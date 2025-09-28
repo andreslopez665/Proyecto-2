@@ -1,2 +1,622 @@
 # Proyecto-2
 Let´s Start
+[proyecto algebra.html](https://github.com/user-attachments/files/22580238/proyecto.algebra.html)
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>¿Quién quiere ser Matemático? — Versión Final</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#0f3460; --bg2:#16213e; --accent:#ffd700; --card1:rgba(255,255,255,0.03);
+  --btn-blue-start: linear-gradient(135deg,#ffd700,#ffed4e);
+  --option-blue: linear-gradient(135deg,#3498db,#2980b9);
+}
+html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(45deg,var(--bg1),var(--bg2));color:#fff}
+.container{max-width:1100px;margin:24px auto;padding:20px}
+.header{text-align:center;margin-bottom:18px}
+.title{font-size:2rem;font-weight:800; background:linear-gradient(45deg,#ffd700,#ffed4e,#ffd700); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:2px 2px 6px rgba(0,0,0,0.6); animation:glow 2s ease-in-out infinite alternate}
+@keyframes glow{from{filter:brightness(1)} to{filter:brightness(1.18)}}
+.layout{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.card{background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); padding:18px;border-radius:14px;border:2px solid rgba(255,215,0,0.06); box-shadow: 0 8px 30px rgba(0,0,0,0.6)}
+.start-screen{display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;padding:30px}
+.mode-select{display:flex;gap:10px}
+.mode-btn{padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,0.04);background:transparent;cursor:pointer}
+.mode-btn.active{background:var(--accent);color:#112;border-color:var(--accent)}
+.hud{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.timer-wrap{width:100%;display:flex;flex-direction:column;gap:6px}
+.timer-bar{height:14px;background:rgba(0,0,0,0.2);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+.timer-fill{height:100%;background:linear-gradient(90deg,#ff6b6b,#ffd700);width:100%;transition:width 1s linear}
+.qtext{font-size:1.15rem;text-align:center;padding:18px;border-radius:10px;background:rgba(255,215,0,0.04);margin-bottom:12px;min-height:64px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.option{padding:14px;border-radius:10px;background:var(--option-blue);cursor:pointer;border:2px solid rgba(116,185,255,0.25);text-align:center;transition:all 0.18s ease; font-weight:700}
+.option:hover{transform:translateY(-4px)}
+.option.correct{background:linear-gradient(90deg,#00b894,#00a085);border-color:rgba(0,0,0,0.2)}
+.option.incorrect{background:linear-gradient(90deg,#d63031,#b71c1c);border-color:rgba(0,0,0,0.2)}
+.option.hidden{visibility:hidden;opacity:0}
+.lifelines{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.lifeline{padding:10px 12px;border-radius:999px;background:var(--btn-blue-start);color:#112;border:none;cursor:pointer;font-weight:800}
+.lifeline.used{opacity:0.45;cursor:not-allowed}
+.sticky-right{display:flex;flex-direction:column;gap:12px}
+.prize-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow:auto;padding-right:6px}
+.prize-item{display:flex;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(0,0,0,0.12);align-items:center;border:1px solid rgba(255,255,255,0.02)}
+.prize-item.current{background:linear-gradient(90deg,#ffd700,#ffed4e);color:#112;font-weight:800;transform:scale(1.02)}
+.prize-item.won{background:linear-gradient(90deg,#00b894,#00a085);color:#fff;font-weight:700}
+.footer{margin-top:12px;text-align:center;color:rgba(255,255,255,0.6);font-size:0.9rem}
+.badge{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.06);font-weight:700;color:var(--accent)}
+
+/* responsive */
+@media(max-width:900px){.layout{grid-template-columns:1fr}.options{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- AUDIO ELEMENTS -->
+<!-- Background music (user uploaded). The file is expected to be in the same folder when opening locally. -->
+<audio id="bgAudio" playsinline webkit-playsinline muted src="./WhatsApp Audio 2025-09-27 at 7.54.48 PM.aac" preload="auto" loop></audio>
+<!-- Win music uses the same file but separate element so we can control volume independently -->
+<audio id="winAudio" playsinline webkit-playsinline muted src="./WhatsApp Audio 2025-09-27 at 7.54.48 PM.aac" preload="auto"></audio>
+
+<div class="container">
+  <div class="header">
+    <div class="title">¿Quién quiere ser Matemático? — Final</div>
+  </div>
+
+  <div class="layout">
+    <div class="card" id="mainCard">
+      <div id="startArea" class="start-screen">
+        <h2>Elige modo y nivel</h2>
+        <div class="mode-select" style="margin-top:8px">
+          <button class="mode-btn active" data-mode="normal">🎯 Modo Normal</button>
+          <button class="mode-btn" data-mode="infinite">♾️ Modo Infinito</button>
+        </div>
+        <div style="margin-top:10px">
+          <label style="margin-right:8px">Nivel:</label>
+          <button class="mode-btn active" data-level="easy">Fácil</button>
+          <button class="mode-btn" data-level="medium">Medio</button>
+          <button class="mode-btn" data-level="hard">Difícil</button>
+        </div>
+        <div style="margin-top:14px">
+          <button class="lifeline" id="startBtn" style="padding:12px 20px">Iniciar</button>
+        </div>
+        <div style="margin-top:14px;text-align:left;width:100%">
+          <h4 style="color:var(--accent);margin-bottom:8px">Logros disponibles</h4>
+          <div id="achList">
+            <div class="badge">5 aciertos seguidos</div>
+            <div class="badge">Responder &lt; 3s</div>
+            <div class="badge">Usar 0 comodines</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameArea" class="hidden">
+        <div class="hud">
+          <div class="qmeta">
+            <div id="qNumber">Pregunta 1</div>
+            &nbsp;•&nbsp;
+            <div id="levelTag" class="badge">Fácil</div>
+          </div>
+          <div style="text-align:right">
+            <div id="scoreDisplay">Premio: $0</div>
+            <div id="streakDisplay" style="font-size:0.9rem;color:rgba(255,255,255,0.75)">Racha: 0</div>
+          </div>
+        </div>
+
+        <div class="timer-wrap">
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:rgba(255,255,255,0.6)"><div id="timeLabel">Tiempo</div><div id="timeLeftLabel">20s</div></div>
+          <div class="timer-bar"><div id="timerFill" class="timer-fill"></div></div>
+        </div>
+
+        <div id="questionBox" class="qtext">Aquí va la pregunta</div>
+
+        <div id="optionsBox" class="options"></div>
+
+        <div class="lifelines" id="lifelines">
+          <div class="lifeline" id="ll50">50/50</div>
+          <div class="lifeline" id="llHint">Pista</div>
+          <div class="lifeline" id="llSkip">Saltar</div>
+          <div class="lifeline" id="llAudience">Público</div>
+          <div class="lifeline" id="llPhone">Llamar</div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+          <button class="mode-btn" id="nextBtn" style="display:none">Siguiente →</button>
+          <button class="mode-btn" id="quitBtn">Rendirse</button>
+        </div>
+
+        <div id="explanation" class="card" style="margin-top:12px;display:none;text-align:left"></div>
+
+      </div>
+    </div>
+
+    <div class="sticky-right">
+      <div class="card card-right">
+        <h3 style="margin-top:0">Premios</h3>
+        <div class="prize-list" id="prizeList"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);text-align:center">Aciertos: <div id="statCorrect">0</div></div>
+          <div style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);text-align:center">Fallos: <div id="statWrong">0</div></div>
+          <div style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);text-align:center">Tiempo promedio: <div id="statAvgTime">0s</div></div>
+          <div style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);text-align:center">Comodines usados: <div id="statLifelines">0</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Ranking local</h4>
+        <ol id="rankingList" style="padding-left:18px"></ol>
+      </div>
+
+      <div class="card">
+        <h4>Últimos logros</h4>
+        <div id="recentAchievements"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Hecho con ♥ — Archivo de audio integrado (inicia, respuesta, victoria)</div>
+</div>
+
+<script>
+// ----------------------------- Utilities (tones & storage) -----------------------------
+function playTone(freq, duration=0.25, type='sine'){
+  try{
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type; o.frequency.value = freq;
+    o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.09, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + duration);
+    o.start(); o.stop(ac.currentTime + duration);
+  }catch(e){ console.warn('Audio API no disponible', e) }
+}
+function playSequence(freqs, interval=110, type='sine'){ freqs.forEach((f,i)=> setTimeout(()=>playTone(f,0.18,type), i*interval)); }
+
+function saveRanking(score){
+  const k='mq_ranking_v1';
+  const arr = JSON.parse(localStorage.getItem(k) || '[]');
+  arr.push({score:score, date: new Date().toISOString()});
+  arr.sort((a,b)=>b.score-a.score);
+  localStorage.setItem(k, JSON.stringify(arr.slice(0,8)));
+  renderRanking();
+}
+function renderRanking(){
+  const k='mq_ranking_v1'; const ol=document.getElementById('rankingList'); ol.innerHTML='';
+  const arr = JSON.parse(localStorage.getItem(k) || '[]');
+  arr.forEach((r)=>{
+    const li=document.createElement('li'); li.textContent = `$${r.score} — ${new Date(r.date).toLocaleString()}`; ol.appendChild(li);
+  });
+}
+renderRanking();
+
+// ----------------------------- Question bank (sanitized from mejorado) -----------------------------
+const QUESTION_BANK = {
+  easy: [
+    {q:"5 + 7 = ?", o:["10","11","12","14"], c:2, explain:"5+7=12."},
+    {q:"12 - 4 = ?", o:["7","8","9","6"], c:1, explain:"12-4=8."},
+    {q:"3 × 6 = ?", o:["18","16","20","14"], c:0, explain:"3×6=18."},
+    {q:"√81 = ?", o:["8","9","7","6"], c:1, explain:"√81=9."},
+    {q:"25% de 200 = ?", o:["25","30","40","50"], c:3, explain:"25% es 1/4 → 200/4=50."},
+    {q:"Área de cuadrado lado 4 = ?", o:["12","14","16","18"], c:2, explain:"4×4=16."},
+    {q:"¿Qué número completa? 2,4,6,?", o:["8","9","10","7"], c:0, explain:"Secuencia +2 → 8."},
+    {q:"6² = ?", o:["36","32","30","42"], c:0, explain:"6×6=36."},
+    {q:"10/2 = ?", o:["3","4","5","6"], c:2, explain:"10 dividido entre 2 es 5."},
+    {q:"1/2 + 1/4 = ?", o:["3/4","2/3","1/4","5/4"], c:0, explain:"1/2+1/4=3/4."}
+  ],
+  medium: [
+    {q:"Si 3x=15, x = ?", o:["3","4","5","6"], c:2, explain:"x=15/3=5."},
+    {q:"(15+5) × 2 = ?", o:["30","40","20","50"], c:1, explain:"(15+5)=20 → ×2=40."},
+    {q:"12% de 250 = ?", o:["30","25","24","28"], c:0, explain:"250×0.12=30."},
+    {q:"Área triángulo b=6 h=4 = ?", o:["12","10","24","14"], c:0, explain:"(b×h)/2=12."},
+    {q:"3/4 de 20 = ?", o:["12","14","15","10"], c:2, explain:"20×3/4=15."},
+    {q:"x² = 49 → x = ?", o:["-7 y 7","7","-7","0"], c:0, explain:"x puede ser ±7."},
+    {q:"M.C.D. de 12 y 18 = ?", o:["3","6","9","12"], c:1, explain:"Máximo común divisor 6."},
+    {q:"45 ÷ 9 = ?", o:["4","5","6","7"], c:1, explain:"45/9=5."},
+    {q:"6/8 simplificado = ?", o:["3/4","2/3","1/2","4/6"], c:0, explain:"6/8=3/4."},
+    {q:"Media de 4,6,8 = ?", o:["5","6","7","8"], c:1, explain:"(4+6+8)/3=6."}
+  ],
+  hard: [
+    {q:"d/dx x² = ?", o:["2x","x","x²","0"], c:0, explain:"Derivada de x² es 2x."},
+    {q:"∫ 2x dx = ?", o:["x² + C","2x² + C","ln x + C","x + C"], c:0, explain:"Integral de 2x es x² + C."},
+    {q:"lim_{x→0} sin(x)/x = ?", o:["0","1","∞","-1"], c:1, explain:"Límite notable = 1."},
+    {q:"Serie 1+1/2+1/4+... = ?", o:["1","2","∞","1.5"], c:1, explain:"S = 1/(1-1/2)=2."},
+    {q:"log10(1000) = ?", o:["2","3","4","1"], c:1, explain:"10^3=1000 → log10=3."},
+    {q:"det [[1,2],[3,4]] = ?", o:["-2","2","-1","1"], c:0, explain:"1*4-2*3=-2."},
+    {q:"Prob. 2 caras al lanzar 2 monedas =", o:["1/4","1/2","1/3","1/8"], c:0, explain:"(1/2)*(1/2)=1/4."},
+    {q:"25% de 360 = ?", o:["90","80","85","95"], c:0, explain:"360/4=90."}
+  ]
+};
+
+// ----------------------------- Sanitize (ensure correct indices) -----------------------------
+function sanitizeBank(){
+  for(const lvl of Object.keys(QUESTION_BANK)){
+    QUESTION_BANK[lvl] = QUESTION_BANK[lvl].filter(q=> q.c>=0 && q.c < q.o.length);
+  }
+}
+sanitizeBank();
+
+// ----------------------------- Game Class (based on mejorado) -----------------------------
+class Game{
+  constructor(){
+    this.resetState();
+    this.bindUI();
+    this.updatePrizeList();
+    this.renderAchievements();
+    // audio elements
+    this.bgAudio = document.getElementById('bgAudio');
+    this.winAudio = document.getElementById('winAudio');
+    // set sensible defaults
+    try{ this.bgAudio.volume = 0.18; }catch(e){}
+    try{ this.winAudio.volume = 0.9; }catch(e){}
+  }
+  resetState(){
+    this.mode = 'normal';
+    this.level = 'easy';
+    this.timePerLevel = {easy:20, medium:20, hard:30};
+    this.currentQuestion = null;
+    this.timer = null;
+    this.timeLeft = 0;
+    this.score = 0;
+    this.currentIndex = 0;
+    this.streak = 0;
+    this.correctCount = 0;
+    this.wrongCount = 0;
+    this.totalResponseTime = 0;
+    this.lifelineUses = 0;
+    this.usedLifelines = {ll50:false, llHint:false, llSkip:false, llAudience:false, llPhone:false};
+    this.achievements = JSON.parse(localStorage.getItem('mq_achv')||'[]');
+  }
+
+  bindUI(){
+    document.querySelectorAll('.mode-btn[data-mode]').forEach(btn=> btn.addEventListener('click', e=>{
+      document.querySelectorAll('.mode-btn[data-mode]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      this.mode = btn.dataset.mode;
+    }));
+    document.querySelectorAll('.mode-btn[data-level]').forEach(btn=> btn.addEventListener('click', e=>{
+      document.querySelectorAll('.mode-btn[data-level]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      this.level = btn.dataset.level;
+      document.getElementById('levelTag').textContent = this.level === 'easy' ? 'Fácil' : (this.level === 'medium' ? 'Medio' : 'Difícil');
+    }));
+    document.getElementById('startBtn').addEventListener('click', ()=> this.start());
+    document.getElementById('ll50').addEventListener('click', ()=> this.use50());
+    document.getElementById('llHint').addEventListener('click', ()=> this.useHint());
+    document.getElementById('llSkip').addEventListener('click', ()=> this.useSkip());
+    document.getElementById('llAudience').addEventListener('click', ()=> this.useAudience());
+    document.getElementById('llPhone').addEventListener('click', ()=> this.usePhone());
+    document.getElementById('quitBtn').addEventListener('click', ()=> this.endGame(false,'Te rendiste'));
+    document.getElementById('nextBtn').addEventListener('click', ()=> this.nextAfterFeedback());
+    document.getElementById('startBtn').addEventListener('click', ()=> this.start());
+
+    // keyboard
+    document.addEventListener('keydown', (e)=>{
+      if(document.getElementById('gameArea').classList.contains('hidden')) return;
+      const key = e.key.toLowerCase();
+      if(['a','b','c','d'].includes(key)){
+        const idx = ['a','b','c','d'].indexOf(key);
+        const opts = document.querySelectorAll('.option:not(.hidden)');
+        if(opts[idx]) opts[idx].click();
+      }
+      if(['1','2','3','4','5'].includes(key)){
+        const mapping = {'1':'ll50','2':'llHint','3':'llSkip','4':'llAudience','5':'llPhone'};
+        const id = mapping[key];
+        if(id) document.getElementById(id).click();
+      }
+    });
+  }
+
+  start(){
+    this.resetState();
+    const modeBtn = document.querySelector('.mode-btn[data-mode].active');
+    const lvlBtn = document.querySelector('.mode-btn[data-level].active');
+    if(modeBtn) this.mode = modeBtn.dataset.mode;
+    if(lvlBtn) this.level = lvlBtn.dataset.level;
+    document.getElementById('startArea').classList.add('hidden');
+    document.getElementById('gameArea').classList.remove('hidden');
+    this.updatePrizeList();
+    // start background music
+    this.playBackground();
+    this.nextQuestion(true);
+  }
+
+  playBackground(){
+    try{
+      this.winAudio.pause(); this.winAudio.currentTime = 0;
+      this.bgAudio.loop = true;
+      this.bgAudio.volume = 0.18;
+      const p = this.bgAudio.play();
+      if(p && p.catch) p.catch(()=>{/* autoplay blocked */});
+    }catch(e){console.warn('No se pudo iniciar bg audio', e)}
+  }
+  stopBackground(){
+    try{ this.bgAudio.pause(); this.bgAudio.currentTime = 0; }catch(e){}
+  }
+  playWinMusic(){
+    try{
+      // pause bg, play win audio louder
+      this.stopBackground();
+      this.winAudio.currentTime = 0;
+      this.winAudio.volume = 0.95;
+      const p = this.winAudio.play();
+      if(p && p.catch) p.catch(()=>{/* blocked */});
+    }catch(e){console.warn('No se pudo reproducir win audio', e)}
+  }
+
+  pickQuestion(){
+    if(this.mode === 'normal'){
+      const bank = QUESTION_BANK[this.level];
+      if(this.currentIndex >= bank.length) return null;
+      return bank[this.currentIndex++];
+    } else {
+      let available = [];
+      if(this.level === 'easy') available = QUESTION_BANK.easy.slice();
+      else if(this.level === 'medium') available = QUESTION_BANK.medium.concat(QUESTION_BANK.easy);
+      else available = QUESTION_BANK.hard.concat(QUESTION_BANK.medium, QUESTION_BANK.easy);
+      const rounds = this.correctCount;
+      if(this.mode==='infinite'){
+        if(rounds >= 15) available = QUESTION_BANK.hard.concat(available);
+        else if(rounds >= 7) available = QUESTION_BANK.medium.concat(available);
+      }
+      return available[Math.floor(Math.random()*available.length)];
+    }
+  }
+
+  nextQuestion(isStart=false){
+    if(this.mode==='infinite' && this.correctCount>0 && this.correctCount % 5 === 0){
+      if(this.level==='easy') { this.level='medium'; this.announceLevelUp(); }
+      else if(this.level==='medium') { this.level='hard'; this.announceLevelUp(); }
+    }
+    const q = this.pickQuestion();
+    if(!q){ this.endGame(true); return; }
+    this.currentQuestion = q;
+    this.renderQuestion(q, isStart);
+  }
+
+  renderQuestion(q, isStart=false){
+    const qbox = document.getElementById('questionBox');
+    qbox.textContent = q.q;
+    document.getElementById('qNumber').textContent = this.mode==='normal' ? `Pregunta ${this.currentIndex}` : `Ronda ${this.correctCount+1}`;
+    document.getElementById('scoreDisplay').textContent = `Premio: $${this.score}`;
+    const opts = document.getElementById('optionsBox'); opts.innerHTML='';
+    q.o.forEach((txt, i)=>{
+      const d = document.createElement('div'); d.className='option'; d.textContent = `${String.fromCharCode(65+i)}. ${txt}`;
+      d.addEventListener('click', ()=> this.selectAnswer(i, d));
+      opts.appendChild(d);
+    });
+    this.startTimer();
+    document.getElementById('explanation').style.display='none';
+    document.getElementById('nextBtn').style.display='none';
+    ['ll50','llHint','llSkip','llAudience','llPhone'].forEach(id=>{
+      document.getElementById(id).classList.toggle('used', this.usedLifelines[id]);
+    });
+  }
+
+  startTimer(){
+    clearInterval(this.timer);
+    this.timeLeft = this.timePerLevel[this.level] || 20;
+    document.getElementById('timeLeftLabel').textContent = `${this.timeLeft}s`;
+    const fill = document.getElementById('timerFill');
+    fill.style.width = '100%';
+    const total = this.timeLeft;
+    this.timer = setInterval(()=>{
+      this.timeLeft--;
+      const perc = Math.max(0,(this.timeLeft/total)*100);
+      fill.style.width = perc+'%';
+      document.getElementById('timeLeftLabel').textContent = `${this.timeLeft}s`;
+      if(this.timeLeft<=0){ clearInterval(this.timer); this.onTimeOut(); }
+    },1000);
+  }
+
+  onTimeOut(){
+    playSequence([220,180,130],100,'square');
+    this.wrongCount++;
+    this.showResult(false, 'Se acabó el tiempo');
+  }
+
+  selectAnswer(idx, el){
+    if(!this.currentQuestion) return;
+    clearInterval(this.timer);
+    const options = document.querySelectorAll('.option');
+    options.forEach(o=>o.style.pointerEvents='none');
+    const correct = this.currentQuestion.c;
+    const isCorrect = (idx === correct);
+    const responseTime = (this.timePerLevel[this.level] - this.timeLeft);
+    this.totalResponseTime += responseTime;
+    // duck background volume briefly
+    this.duckBg();
+    if(isCorrect){
+      this.correctCount++;
+      this.streak++;
+      const base = this.mode==='normal' ? this.getPrizeValue() : 100;
+      const bonus = Math.floor(this.streak/5)*50;
+      this.score += base + bonus;
+      el.classList.add('correct');
+      playSequence([523,659,784],90,'sine');
+      this.showResult(true);
+    } else {
+      this.wrongCount++;
+      el.classList.add('incorrect');
+      if(this.wrongCount === 1 && !this.usedExtraLife){
+        this.usedExtraLife = true;
+        alert("⚠️ Primera equivocación perdonada, tienes otra oportunidad.");
+        this.nextAfterFeedback();
+        return;
+      }
+
+      options[correct] && options[correct].classList.add('correct');
+      playSequence([330,294,262],120,'square');
+      this.streak = 0;
+      this.showResult(false, 'Respuesta incorrecta');
+    }
+    this.updateStats();
+  }
+
+  duckBg(){
+    try{
+      if(this.bgAudio){
+        const prev = this.bgAudio.volume;
+        this.bgAudio.volume = Math.max(0.03, prev * 0.35);
+        setTimeout(()=>{ try{ this.bgAudio.volume = prev; }catch(e){} }, 700);
+      }
+    }catch(e){}
+  }
+
+  showResult(isCorrect, message=''){
+    const exp = document.getElementById('explanation'); exp.style.display='block';
+    exp.innerHTML = `<strong>${isCorrect ? '¡Correcto!' : 'Fallaste'}</strong><div style="margin-top:8px;color:rgba(255,255,255,0.8)">${this.currentQuestion.explain || ''}</div>`;
+    document.getElementById('nextBtn').style.display = 'inline-block';
+    document.getElementById('nextBtn').disabled = false;
+    if(!isCorrect){
+      setTimeout(()=>{
+        if(this.mode === 'normal') this.endGame(false, message);
+        else this.nextAfterFeedback();
+      }, 1400);
+    } else {
+      this.checkAchievements();
+      setTimeout(()=>{
+        if(this.mode === 'normal') this.nextQuestion();
+        else this.nextAfterFeedback();
+      }, 700);
+    }
+  }
+
+  nextAfterFeedback(){
+    document.getElementById('explanation').style.display='none';
+    this.nextQuestion();
+  }
+
+  getPrizeValue(){
+    const table = [100,200,300,400,500,800,1000,1200,1500,2000];
+    return table[Math.min(this.currentIndex, table.length-1)];
+  }
+
+  updateStats(){
+    document.getElementById('statCorrect').textContent = this.correctCount;
+    document.getElementById('statWrong').textContent = this.wrongCount;
+    const avg = this.correctCount ? Math.round(this.totalResponseTime / this.correctCount) : 0;
+    document.getElementById('statAvgTime').textContent = avg + 's';
+    document.getElementById('statLifelines').textContent = this.lifelineUses;
+    document.getElementById('streakDisplay').textContent = 'Racha: '+this.streak;
+    document.getElementById('scoreDisplay').textContent = 'Premio: $'+this.score;
+    this.updatePrizeList();
+  }
+
+  updatePrizeList(){
+    const list = document.getElementById('prizeList'); list.innerHTML='';
+    const table = [100,200,300,400,500,800,1000,1200,1500,2000];
+    for(let i=table.length-1;i>=0;i--){
+      const div = document.createElement('div'); div.className='prize-item';
+      const qn = i+1; div.innerHTML = `<div>Pregunta ${qn}</div><div>$${table[i]}</div>`;
+      if(this.currentIndex === i) div.classList.add('current');
+      if(i < this.currentIndex) div.classList.add('won');
+      list.appendChild(div);
+    }
+  }
+
+  use50(){ if(this.usedLifelines.ll50) return; this.usedLifelines.ll50=true; this.lifelineUses++; document.getElementById('ll50').classList.add('used');
+    const options = Array.from(document.querySelectorAll('.option'));
+    const correct = this.currentQuestion.c;
+    let removed = 0;
+    const incorrectIdx = options.map((o,i)=>i).filter(i=>i!==correct);
+    while(removed<2 && incorrectIdx.length){
+      const pick = incorrectIdx.splice(Math.floor(Math.random()*incorrectIdx.length),1)[0];
+      options[pick].classList.add('hidden'); removed++;
+    }
+    playTone(880, 0.15, 'square'); this.updateStats();
+  }
+
+  useHint(){ if(this.usedLifelines.llHint) return; this.usedLifelines.llHint=true; this.lifelineUses++; document.getElementById('llHint').classList.add('used');
+    alert('💡 Pista: ' + (this.currentQuestion.explain || 'Intenta eliminar opciones'));
+    playTone(660, 0.2, 'sine'); this.updateStats();
+  }
+
+  useSkip(){ if(this.usedLifelines.llSkip) return; this.usedLifelines.llSkip=true; this.lifelineUses++; document.getElementById('llSkip').classList.add('used');
+    playTone(740, 0.18, 'sine'); this.updateStats();
+    this.nextQuestion();
+  }
+
+  useAudience(){ if(this.usedLifelines.llAudience) return; this.usedLifelines.llAudience=true; this.lifelineUses++; document.getElementById('llAudience').classList.add('used');
+    const correct = this.currentQuestion.c;
+    const base = [10,15,20,25]; base[correct] += 45;
+    const total = base.reduce((a,b)=>a+b,0);
+    const perc = base.map(v=>Math.round(v/total*100));
+    alert('👥 Público: ' + perc.map((p,i)=>`${String.fromCharCode(65+i)}:${p}%`).join(' | '));
+    playSequence([440,540],80,'square'); this.updateStats();
+  }
+
+  usePhone(){ if(this.usedLifelines.llPhone) return; this.usedLifelines.llPhone=true; this.lifelineUses++; document.getElementById('llPhone').classList.add('used');
+    const correct = this.currentQuestion.c;
+    const suggestion = Math.random() < 0.7 ? correct : Math.floor(Math.random()*4);
+    alert('📞 Tu amigo sugiere: ' + String.fromCharCode(65+suggestion));
+    playTone(520, 0.18, 'sine'); this.updateStats();
+  }
+
+  announceLevelUp(){
+    const prev = document.getElementById('levelTag');
+    prev.textContent = this.level === 'medium' ? 'Medio' : 'Difícil';
+    playSequence([600,720,840],80,'sine');
+    const badge = document.createElement('div'); badge.className='badge'; badge.textContent = `Nivel ${prev.textContent} alcanzado`;
+    document.getElementById('recentAchievements').prepend(badge);
+    setTimeout(()=> badge.remove(), 5000);
+  }
+
+  checkAchievements(){
+    if(this.streak >= 5 && !this.achievements.includes('5-in-a-row')){
+      this.achievements.push('5-in-a-row'); this.recordAchievement('5 respuestas seguidas');
+    }
+    if(this.totalResponseTime>0){
+      const avg = this.totalResponseTime / this.correctCount;
+      if(avg <= 3 && !this.achievements.includes('fast')){
+        this.achievements.push('fast'); this.recordAchievement('Rápido: promedio <= 3s');
+      }
+    }
+    if(this.lifelineUses === 0 && this.correctCount >= 10 && !this.achievements.includes('no-lifelines')){
+      this.achievements.push('no-lifelines'); this.recordAchievement('Sin comodines en 10 respuestas');
+    }
+    localStorage.setItem('mq_achv', JSON.stringify(this.achievements));
+  }
+
+  recordAchievement(name){
+    const d = document.createElement('div'); d.className='badge'; d.textContent = '🏅 '+name;
+    document.getElementById('recentAchievements').prepend(d);
+    playSequence([880,660,990],90,'sine');
+    setTimeout(()=> d.remove(),8000);
+  }
+
+  endGame(win, message=''){
+    clearInterval(this.timer);
+    const correct = this.correctCount;
+    const wrong = this.wrongCount;
+    const avg = correct ? Math.round(this.totalResponseTime/correct) : 0;
+    document.getElementById('gameArea').classList.add('hidden');
+    document.getElementById('startArea').classList.remove('hidden');
+    if(win){
+      // play win music (user requested "wim" background for victory)
+      this.playWinMusic();
+      setTimeout(()=> alert(`🎉 Ganaste!\nPuntos: $${this.score}\nAciertos: ${correct}\nFallos: ${wrong}\nTiempo promedio: ${avg}s\n${message || ''}`), 250);
+    } else {
+      setTimeout(()=> alert(`❌ Fin del juego\nPuntos: $${this.score}\nAciertos: ${correct}\nFallos: ${wrong}\nTiempo promedio: ${avg}s\n${message || ''}`), 250);
+    }
+    saveRanking(this.score); renderRanking();
+    this.resetState();
+    this.updateStats();
+    document.getElementById('explanation').style.display='none';
+  }
+
+  renderAchievements(){
+    const list = document.getElementById('achList'); list.innerHTML = '';
+    const defaultBadges = ['5 aciertos seguidos','Responder < 3s','Usar 0 comodines'];
+    for(const b of defaultBadges){
+      const div = document.createElement('div'); div.className='badge'; div.textContent=b; list.appendChild(div);
+    }
+  }
+}
+
+const game = new Game();
+renderRanking();
+
+</script>
+</body>
+</html>
