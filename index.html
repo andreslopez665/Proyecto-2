@@ -1,12 +1,9 @@
-# Proyecto-2
-Let´s Start
-[proyecto algebra.html](https://github.com/user-attachments/files/22580238/proyecto.algebra.html)
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>¿Quién quiere ser Matemático? — Versión Final</title>
+<title>¿Quién quiere ser Matemático? </title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -60,7 +57,7 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
 
 <div class="container">
   <div class="header">
-    <div class="title">¿Quién quiere ser Matemático? — Final</div>
+    <div class="title">¿Quién quiere ser Matemático?</div>
   </div>
 
   <div class="layout">
@@ -228,7 +225,7 @@ const QUESTION_BANK = {
   ]
 };
 
-// ----------------------------- Sanitize (ensure correct indices) -----------------------------
+
 function sanitizeBank(){
   for(const lvl of Object.keys(QUESTION_BANK)){
     QUESTION_BANK[lvl] = QUESTION_BANK[lvl].filter(q=> q.c>=0 && q.c < q.o.length);
@@ -236,7 +233,7 @@ function sanitizeBank(){
 }
 sanitizeBank();
 
-// ----------------------------- Game Class (based on mejorado) -----------------------------
+
 class Game{
   constructor(){
     this.resetState();
@@ -440,7 +437,7 @@ class Game{
       el.classList.add('incorrect');
       if(this.wrongCount === 1 && !this.usedExtraLife){
         this.usedExtraLife = true;
-        alert("⚠️ Primera equivocación perdonada, tienes otra oportunidad.");
+        alert("⚠️ Tienes otra oportunidad.");
         this.nextAfterFeedback();
         return;
       }
